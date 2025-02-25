@@ -41,7 +41,8 @@ services:
     volumes:
       - ./keycloak_data/certs:/etc/keycloak/certs
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - keycloak-network
 
