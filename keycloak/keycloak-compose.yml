@@ -21,13 +21,12 @@ services:
     container_name: keycloak-sso
     restart: always
     environment:
-      DB_VENDOR: ${DB_VENDOR}
-      DB_ADDR: ${DB_ADDR}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: "jdbc:postgresql://postgres:5432/${POSTGRES_DB}"
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
       KC_HTTPS_CERTIFICATE_FILE: /etc/keycloak/certs/tls.crt.pem
       KC_HTTPS_CERTIFICATE_KEY_FILE: /etc/keycloak/certs/tls.key.pem
     command: ["start-dev", "--http-port", "8080", "--https-port", "8443"]
