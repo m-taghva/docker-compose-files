@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  
+  # add nginx or haproxy service here
+
+  redmine:
+    image: redmine:5.1.8
+    container_name: redmine-app
+    restart: always
+    volumes:
+      - 'redmine_data:/usr/src/redmine/files'
+      - './redmine_plugins:/usr/src/redmine/plugins'
+      - '/etc/localtime:/etc/localtime:ro'
+      - '/etc/timezone:/etc/timezone:ro'
+    # if you have local proxy in your network uncomment this part, if not nginx/haproxy service will do
+    #ports:
+    # - 3000:3000
+    environment:
+      REDMINE_DB_MYSQL: mysql
+      REDMINE_DB_PORT: 3306
+      REDMINE_DB_DATABASE: ${REDMINE_DB_DATABASE}
+      REDMINE_DB_USERNAME: ${REDMINE_DB_USERNAME}
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD}
+      REDMINE_SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE}
+    depends_on:
+      - mysql
+    networks:
+      - redmine-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-check-certificate --quiet --method HEAD --output-document /dev/null http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  mysql:
+    image: mysql:9.3.0
+    container_name: redmine-db
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    networks:
+      - redmine-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  mysql_data:
+    name: mysql_data
+    driver: local
+  redmine_data:
+    name: redmine_data
+    driver: local
+
+networks:
+  redmine-network:
+    name: redmine-network
+    driver: bridge
